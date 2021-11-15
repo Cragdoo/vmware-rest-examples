@@ -1,0 +1,60 @@
+**Setting variables and creating session token**
+
+$vcenter = "cd-lab-vc1.cragdoo.co.uk"
+$username = @()
+$password = @()
+$username = (Get-PSCredential $vcenter).username
+$password = (Get-PSCredential $vcenter).GetNetworkCredential().Password
+$headers = @{Authorization = 'Basic ' + [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("$($username):$($password)"))}
+$response = Invoke-RestMethod -Uri $sessionURI -Method POST -Headers $headers
+$token = $response.value
+$session = @{'vmware-api-session-id' = $token}
+
+
+** Example - Creating a VM **
+** POST **
+** Create VM **
+Invoke-RestMethod -uri https://cd-lab-vc1.cragdoo.co.uk/rest/vcenter/vm/ -Method Post -Headers $session -ContentType "application/json" -Body (Get-Content New-VM.txt)
+
+{
+    "spec":{
+        "name":"VMUG-VM1",
+        "guest_OS":"RHEL_7_64",
+        "placement":{
+            "datastore":"datastore-346",
+            "folder":"group-v142",
+            "resource_pool":"resgroup-283"
+        },
+        "memory":{
+            "size_MiB":1024,
+            "hot_add_enabled":true
+        }
+    }
+}
+    }
+}
+**
+
+** Example - Updating a VM **
+** PATCH **
+** Update Memory **
+Invoke-RestMethod -uri https://cd-lab-vc1.cragdoo.co.uk/rest/vcenter/vm/vm-54360/hardware/memory -Method PATCH -Headers $session -ContentType "application/json" -Body (Get-Content New-Mem.txt)
+ 
+{
+    "spec": {
+        "size_MiB": 1024
+    }
+}
+**
+
+** Example - Retrieving information **
+** GET **
+** List memory **
+invoke-RestMethod -uri https://cd-lab-vc1.cragdoo.co.uk/rest/vcenter/vm/vm-54360/hardware/memory -Method GET -Headers $session
+**
+
+** Example - deleting a VM **
+** DELETE **
+** VM **
+invoke-RestMethod -uri https://bmgm1-vc1/rest/vcenter/vm/vm-54360 -Method DELETE -Headers $session
+**
