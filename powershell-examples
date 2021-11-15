@@ -1,6 +1,8 @@
 **Setting variables and creating session token**
 
 $vcenter = "cd-lab-vc1.cragdoo.co.uk"
+$BaseUri = "https://$vcenter/rest/"
+$sessionURI = $BaseUri +"com/vmware/cis/session"
 $username = @()
 $password = @()
 $username = (Get-PSCredential $vcenter).username
